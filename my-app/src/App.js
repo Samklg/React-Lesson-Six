@@ -1,36 +1,75 @@
-import logo from './logo.svg';
+import React, { useState } from 'react';
 import './App.css';
-import React from 'react';
 
-export const App = () => {
-	const currentYear = new Date().getFullYear();
-	return React.createElement(
-		'div',
-		{ className: 'App' },
-		React.createElement(
-			'header',
-			{ className: 'App-header' },
-			React.createElement('img', { src: logo, className: 'App-logo', alt: 'logo' }),
-			React.createElement(
-				'p',
-				null,
-				'Edit ',
-				React.createElement('code', null, 'src/App.js'),
-				' and save to reload.',
-			),
-			React.createElement(
-				'a',
-				{
-					className: 'App-link',
-					href: 'https://reactjs.org',
-					target: '_blank',
-					rel: 'noopener noreferrer',
-				},
-				'Learn React',
-			),
-			React.createElement('p', null, currentYear),
-		),
+export function App() {
+	const [displayValue, setDisplayValue] = useState('');
+	const [firstValue, setFirstValue] = useState('');
+	const [operator, setOperator] = useState('');
+	const [displayColor, setDisplayColor] = useState('black');
+
+	const handleNumberClick = (number) => {
+		setDisplayValue(`${displayValue}${number}`);
+		setDisplayColor('black');
+	};
+
+	const handleOperatorClick = (op) => {
+		setFirstValue(displayValue);
+		setOperator(op);
+		setDisplayValue('');
+	};
+
+	const handleReset = () => {
+		setDisplayValue('');
+		setFirstValue('');
+		setOperator('');
+		setDisplayColor('black');
+	};
+
+	const handleResult = () => {
+		const secondValue = parseInt(displayValue);
+		let result = 0;
+
+		switch (operator) {
+			case '+':
+				result = parseInt(firstValue) + secondValue;
+				break;
+			case '-':
+				result = parseInt(firstValue) - secondValue;
+				break;
+			default:
+				result = 0;
+				break;
+		}
+
+		setDisplayValue(result.toString());
+		setFirstValue(result.toString());
+		setOperator('');
+		setDisplayColor('green');
+	};
+
+	return (
+		<div className="calculator">
+			<div className="display" style={{ color: displayColor }}>
+				{displayValue}
+			</div>
+			<div className="buttons">
+				<button onClick={() => handleNumberClick(0)}>0</button>
+				<button onClick={() => handleNumberClick(1)}>1</button>
+				<button onClick={() => handleNumberClick(2)}>2</button>
+				<button onClick={() => handleNumberClick(3)}>3</button>
+				<button onClick={() => handleNumberClick(4)}>4</button>
+				<button onClick={() => handleNumberClick(5)}>5</button>
+				<button onClick={() => handleNumberClick(6)}>6</button>
+				<button onClick={() => handleNumberClick(7)}>7</button>
+				<button onClick={() => handleNumberClick(8)}>8</button>
+				<button onClick={() => handleNumberClick(9)}>9</button>
+				<button onClick={() => handleOperatorClick('+')}>+</button>
+				<button onClick={() => handleOperatorClick('-')}>-</button>
+				<button onClick={handleResult}>=</button>
+				<button onClick={handleReset}>C</button>
+			</div>
+		</div>
 	);
-};
+}
 
-// императивных элементов нет
+export default App;
