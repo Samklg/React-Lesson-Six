@@ -1,75 +1,108 @@
-import React, { useState } from 'react';
-import './App.css';
+import { useState } from 'react';
 
-export function App() {
-	const [displayValue, setDisplayValue] = useState('');
-	const [firstValue, setFirstValue] = useState('');
-	const [operator, setOperator] = useState('');
-	const [displayColor, setDisplayColor] = useState('black');
+function Square({ value, onSquareClick }) {
+	return (
+		<button className="square" onClick={onSquareClick}>
+			{value}
+		</button>
+	);
+}
 
-	const handleNumberClick = (number) => {
-		setDisplayValue(`${displayValue}${number}`);
-		setDisplayColor('black');
-	};
-
-	const handleOperatorClick = (op) => {
-		setFirstValue(displayValue);
-		setOperator(op);
-		setDisplayValue('');
-	};
-
-	const handleReset = () => {
-		setDisplayValue('');
-		setFirstValue('');
-		setOperator('');
-		setDisplayColor('black');
-	};
-
-	const handleResult = () => {
-		const secondValue = parseInt(displayValue);
-		let result = 0;
-
-		switch (operator) {
-			case '+':
-				result = parseInt(firstValue) + secondValue;
-				break;
-			case '-':
-				result = parseInt(firstValue) - secondValue;
-				break;
-			default:
-				result = 0;
-				break;
+function Board({ xIsNext, squares, onPlay }) {
+	function handleClick(i) {
+		if (calculateWinner(squares) || squares[i]) {
+			return;
 		}
+		const nextSquares = squares.slice();
+		if (xIsNext) {
+			nextSquares[i] = 'X';
+		} else {
+			nextSquares[i] = 'O';
+		}
+		onPlay(nextSquares);
+	}
 
-		setDisplayValue(result.toString());
-		setFirstValue(result.toString());
-		setOperator('');
-		setDisplayColor('green');
-	};
+	const winner = calculateWinner(squares);
+	let status;
+	if (winner) {
+		status = 'Победил: ' + winner;
+	} else {
+		status = 'Сейчас ходит: ' + (xIsNext ? 'X' : 'O');
+	}
 
 	return (
-		<div className="calculator">
-			<div className="display" style={{ color: displayColor }}>
-				{displayValue}
+		<>
+			<div className="status">{status}</div>
+			<div className="board-row">
+				<Square value={squares[0]} onSquareClick={() => handleClick(0)} />
+				<Square value={squares[1]} onSquareClick={() => handleClick(1)} />
+				<Square value={squares[2]} onSquareClick={() => handleClick(2)} />
 			</div>
-			<div className="buttons">
-				<button onClick={() => handleNumberClick(0)}>0</button>
-				<button onClick={() => handleNumberClick(1)}>1</button>
-				<button onClick={() => handleNumberClick(2)}>2</button>
-				<button onClick={() => handleNumberClick(3)}>3</button>
-				<button onClick={() => handleNumberClick(4)}>4</button>
-				<button onClick={() => handleNumberClick(5)}>5</button>
-				<button onClick={() => handleNumberClick(6)}>6</button>
-				<button onClick={() => handleNumberClick(7)}>7</button>
-				<button onClick={() => handleNumberClick(8)}>8</button>
-				<button onClick={() => handleNumberClick(9)}>9</button>
-				<button onClick={() => handleOperatorClick('+')}>+</button>
-				<button onClick={() => handleOperatorClick('-')}>-</button>
-				<button onClick={handleResult}>=</button>
-				<button onClick={handleReset}>C</button>
+			<div className="board-row">
+				<Square value={squares[3]} onSquareClick={() => handleClick(3)} />
+				<Square value={squares[4]} onSquareClick={() => handleClick(4)} />
+				<Square value={squares[5]} onSquareClick={() => handleClick(5)} />
+			</div>
+			<div className="board-row">
+				<Square value={squares[6]} onSquareClick={() => handleClick(6)} />
+				<Square value={squares[7]} onSquareClick={() => handleClick(7)} />
+				<Square value={squares[8]} onSquareClick={() => handleClick(8)} />
+			</div>
+		</>
+	);
+}
+
+export default function App() {
+	const [currentSquares, setCurrentSquares] = useState(Array(9).fill(null));
+	const [xIsNext, setXIsNext] = useState(true);
+
+	function handlePlay(nextSquares) {
+		setCurrentSquares(nextSquares);
+		setXIsNext(!xIsNext);
+	}
+
+	function handleReset() {
+		setCurrentSquares(Array(9).fill(null));
+		setXIsNext(true);
+	}
+
+	const winner = calculateWinner(currentSquares);
+	let status;
+	if (winner) {
+		status = 'Победил: ' + winner;
+	} else {
+		status = 'Сейчас ходит: ' + (xIsNext ? 'X' : 'O');
+	}
+
+	return (
+		<div className="game">
+			<div className="game-board">
+				<Board xIsNext={xIsNext} squares={currentSquares} onPlay={handlePlay} />
+			</div>
+			<div className="game-info">
+				<div className="status">{status}</div>
+				<button onClick={handleReset}>Начать заново</button>
 			</div>
 		</div>
 	);
 }
 
-export default App;
+function calculateWinner(squares) {
+	const lines = [
+		[0, 1, 2],
+		[3, 4, 5],
+		[6, 7, 8],
+		[0, 3, 6],
+		[1, 4, 7],
+		[2, 5, 8],
+		[0, 4, 8],
+		[2, 4, 6],
+	];
+	for (let i = 0; i < lines.length; i++) {
+		const [a, b, c] = lines[i];
+		if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
+			return squares[a];
+		}
+	}
+	return null;
+}
