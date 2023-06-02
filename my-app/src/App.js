@@ -58,7 +58,7 @@ function App() {
 			setFormValid(false);
 		} else {
 			setFormValid(true);
-			registerButtonRef.current.focus(); // переместить фокус на кнопку "Зарегистрироваться"
+			registerButtonRef.current.focus();
 		}
 	};
 
