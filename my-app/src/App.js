@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import './App.css';
 
 function App() {
@@ -9,6 +9,8 @@ function App() {
 	const [passwordError, setPasswordError] = useState('');
 	const [repeatPasswordError, setRepeatPasswordError] = useState('');
 	const [formValid, setFormValid] = useState(false);
+
+	const registerButtonRef = useRef();
 
 	const validateEmail = (email) => {
 		if (!/\S+@\S+\.\S+/.test(email)) {
@@ -56,6 +58,7 @@ function App() {
 			setFormValid(false);
 		} else {
 			setFormValid(true);
+			registerButtonRef.current.focus(); // переместить фокус на кнопку "Зарегистрироваться"
 		}
 	};
 
@@ -88,7 +91,7 @@ function App() {
 				{repeatPasswordError && (
 					<div className="error">{repeatPasswordError}</div>
 				)}
-				<button type="submit" disabled={!formValid}>
+				<button type="submit" disabled={!formValid} ref={registerButtonRef}>
 					Зарегистрироваться
 				</button>
 			</form>
