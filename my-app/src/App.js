@@ -1,54 +1,24 @@
-import { useForm } from 'react-hook-form';
-import * as yup from 'yup';
-import { yupResolver } from '@hookform/resolvers/yup';
+import React, { useState, useEffect } from 'react';
 
-const schema = yup.object().shape({
-	email: yup.string().email().required(),
-	password: yup.string().required().min(6),
-	confirmPassword: yup
-		.string()
-		.required()
-		.oneOf([yup.ref('password'), null], 'Пароли должны совпадать'),
-});
+function TodoList() {
+	const [todos, setTodos] = useState([]);
 
-function App() {
-	const {
-		register,
-		handleSubmit,
-		formState: { errors },
-	} = useForm({
-		resolver: yupResolver(schema),
-	});
-
-	const onSubmit = (data) => {
-		console.log(data);
-	};
+	useEffect(() => {
+		fetch('https://jsonplaceholder.typicode.com/todos')
+			.then((response) => response.json())
+			.then((data) => setTodos(data));
+	}, []);
 
 	return (
-		<form onSubmit={handleSubmit(onSubmit)}>
-			<label>
-				Email:
-				<input type="text" {...register('email')} />
-				{errors.email && <div>{errors.email.message}</div>}
-			</label>
-			<label>
-				Пароль:
-				<input type="password" {...register('password')} />
-				{errors.password && <div>{errors.password.message}</div>}
-			</label>
-			<label>
-				Повторите пароль:
-				<input type="password" {...register('confirmPassword')} />
-				{errors.confirmPassword && <div>{errors.confirmPassword.message}</div>}
-			</label>
-			<button
-				type="submit"
-				disabled={!!(errors.email || errors.password || errors.confirmPassword)}
-			>
-				Зарегистрироваться
-			</button>
-		</form>
+		<div>
+			<h1>Todo List</h1>
+			<ul>
+				{todos.map((todo) => (
+					<li key={todo.id}>{todo.title}</li>
+				))}
+			</ul>
+		</div>
 	);
 }
 
-export default App;
+export default TodoList;
