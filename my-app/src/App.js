@@ -5,7 +5,7 @@ import {
 	Link,
 	useParams,
 	Routes,
-	Navigate,
+	useNavigate,
 } from 'react-router-dom';
 import './App.css';
 
@@ -92,12 +92,8 @@ function TodoList() {
 						/>
 					}
 				/>
-				<Route
-					path="/task/:id"
-					element={<TaskPage todos={todos} deleteTodo={deleteTodo} />}
-				/>
-				<Route path="/404" element={<NotFoundPage />} />
-				<Route path="*" element={<Navigate to="/404" />} />
+				<Route path="/task/:id" element={<TaskPage deleteTodo={deleteTodo} />} />
+				<Route path="*" element={<NotFoundPage />} />
 			</Routes>
 		</Router>
 	);
@@ -146,11 +142,37 @@ function TodoListPage({
 	);
 }
 
-function TaskPage({ todos, deleteTodo }) {
+function TaskPage({ deleteTodo }) {
 	const { id } = useParams();
-	const todo = todos.find((todo) => todo.id === id);
+	const [currentTodo, setCurrentTodo] = useState(null);
+	const navigate = useNavigate();
 
-	if (!todo) {
+	useEffect(() => {
+		fetch(`http://localhost:3001/todos/${id}`)
+			.then((response) => {
+				if (!response.ok) {
+					throw new Error('Ошибка при получении данных о задаче');
+				}
+				return response.json();
+			})
+			.then((data) => {
+				setCurrentTodo(data);
+			})
+			.catch((error) => {
+				console.error(error);
+				setCurrentTodo(null);
+			});
+	}, [id]);
+
+	const goBack = () => {
+		navigate(-1);
+	};
+
+	const handleDelete = () => {
+		deleteTodo(String(currentTodo.id));
+	};
+
+	if (!currentTodo) {
 		return (
 			<div>
 				<h1>Ошибка 404</h1>
@@ -162,19 +184,19 @@ function TaskPage({ todos, deleteTodo }) {
 	return (
 		<div>
 			<h1>Задача</h1>
-			<p>{todo.title}</p>
-			<button onClick={() => deleteTodo(todo.id)}>Удалить</button>
+			<p>{currentTodo.title}</p>
+			<button onClick={handleDelete}>Удалить</button>
 			<form
 				onSubmit={(e) => {
 					e.preventDefault();
 				}}
 			>
-				<input type="text" defaultValue={todo.title} />
+				<input type="text" defaultValue={currentTodo.title} />
 				<button type="submit">Изменить</button>
 			</form>
-			<Link to="/" className="back-link">
-				&larr; Назад
-			</Link>
+			<button onClick={goBack} className="back-button">
+				Назад
+			</button>
 		</div>
 	);
 }
